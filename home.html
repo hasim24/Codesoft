@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Codesoft</title>
+    <link rel="icon" href="icon.jpg" />
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <script src="home.js" defer></script>
+
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        display: flex;
+      }
+    </style>
+  </head>
+
+  <body>
+    <nav class="navbar">
+      <h1>Codesoft</h1>
+      <div class="nav-link">
+        <p class="nav-links"><a href="home.html">Home</a></p>
+        <p class="nav-links"><a href="messages.html">Messages</a></p>
+        <p class="nav-links"><a href="login.html">Logout</a></p>
+      </div>
+
+      <div class="nav-menu">
+        <i class="fa-solid fa-bars"></i>
+      </div>
+    </nav>
+    <div class="side-nav">
+      <p style="text-align: right" class="xmark">
+        <i class="fa-solid fa-xmark"></i>
+      </p>
+
+      <div class="side-nav-link">
+        <p class="side-nav-links"><a href="home.html">Home</a></p>
+        <p class="side-nav-links"><a href="messages.html.html">Messages</a></p>
+        <p class="side-nav-links"><a href="login.html">Logout</a></p>
+      </div>
+    </div>
+
+    <div class="whole-content">
+      <div class="calender-box">
+        <div class="calender">
+          <div class="head">
+            <button id="left"><</button>
+            <div class="mony"></div>
+            <button id="right">></button>
+          </div>
+          <div class="days">
+            <div class="day">Mon</div>
+            <div class="day">Tue</div>
+            <div class="day">Wed</div>
+            <div class="day">Thu</div>
+            <div class="day">Fri</div>
+            <div class="day">Sar</div>
+            <div class="day">Sun</div>
+          </div>
+          <div class="dates"></div>
+        </div>
+      </div>
+
+      <div class="stopwatch">
+        <div class="timer">
+          <p>
+            <span class="display">00:00:00</span>
+          </p>
+          <button class="start">Checkin</button>
+          <button class="stop">Checkout</button>
+        </div>
+      </div>
+
+      <div class="records">
+        <h4>Records</h4>
+        <ol class="record-list"></ol>
+      </div>
+
+      <div class="overlay"></div>
+      <div class="leave">
+        <label for="Name">Name :</label>
+        <input type="text" placeholder="Enter Name" id="name" />
+        <label for="Reason">Reason :</label>
+        <textarea id="reason"></textarea>
+        <button class="req">Request Leave</button>
+        <button class="can">Cancel</button>
+      </div>
+    </div>
+
+    <script>
+      let mony = document.querySelector(".mony");
+      let dates = document.querySelector(".dates");
+      let left = document.getElementById("left");
+      let right = document.getElementById("right");
+
+      let date = new Date();
+
+      let func = () => {
+        let curYear = date.getFullYear();
+        let curMonth = date.getMonth();
+
+        let startDay = new Date(curYear, curMonth, 0);
+        let lastDay = new Date(curYear, curMonth + 1, 0);
+        let totalDays = lastDay.getDate();
+        let startDayIndex = startDay.getDay();
+        let lastDayIndex = lastDay.getDay();
+
+        let monyString = date.toLocaleString("default", {
+          month: "long",
+          year: "numeric",
+        });
+        mony.textContent = monyString;
+
+        let curdate = "";
+
+        for (let i = startDayIndex; i > 0; i--) {
+          let prevDate = new Date(curYear, curMonth, 0 - i + 1);
+          curdate += `<div class="date inactive">${prevDate.getDate()}</div>`;
+        }
+
+        for (let i = 1; i <= totalDays; i++) {
+          let datess = new Date(curYear, curMonth, i);
+          let activeClass =
+            datess.toDateString() === new Date().toDateString() ? "active" : "";
+          curdate += `<div class="date ${activeClass}">${i}</div>`;
+        }
+
+        for (let i = 1; i <= 7 - lastDayIndex; i++) {
+          let nextDate = new Date(curYear, curMonth + 1, i);
+          curdate += `<div class="date inactive">${nextDate.getDate()}</div>`;
+        }
+
+        dates.innerHTML = curdate;
+      };
+
+      left.addEventListener("click", () => {
+        date.setMonth(date.getMonth() - 1);
+        func();
+      });
+
+      right.addEventListener("click", () => {
+        date.setMonth(date.getMonth() + 1);
+        func();
+      });
+
+      func();
+
+      //Stopwatch
+
+      let timer;
+      let running;
+      let records = [];
+      let checkin = document.querySelector(".start");
+      checkin.addEventListener("click", () => {
+        if (!running) {
+          running = true;
+          timer = setInterval(updateWatch, 1000);
+        } else {
+          reset();
+        }
+      });
+
+      let updateWatch = () => {
+        let display = document.querySelector(".display");
+        let time = display.textContent.split(":");
+        let hours = parseInt(time[0], 10);
+        let mins = parseInt(time[1], 10);
+        let secs = parseInt(time[2], 10);
+        secs++;
+
+        if (secs === 60) {
+          secs = 0;
+          mins++;
+        }
+        if (mins === 60) {
+          mins = 0;
+          hours++;
+        }
+        if (hours === 24) {
+          hours = 0;
+        }
+        display.textContent =
+          format(hours) + ":" + format(mins) + ":" + format(secs);
+      };
+      let format = (time) => {
+        return time < 10 ? "0" + time : time;
+      };
+
+      let reset = () => {
+        clearInterval(timer);
+        running = false;
+        document.querySelector(".display").innerHTML = "00:00:00";
+      };
+
+      let checkout = document.querySelector(".stop");
+      checkout.addEventListener("click", () => {
+        records.push(document.querySelector(".display").textContent);
+        lapTimes();
+        document.querySelector(".records").style.display = "block";
+      });
+
+      let lapTimes = () => {
+        let display = document.querySelector(".display");
+        let time = display.textContent.split(":");
+        let recordList = document.querySelector(".record-list");
+        recordList.innerHTML = "";
+        let currentDate = new Date();
+
+        records.forEach((lap, index) => {
+          let lists = document.createElement("li");
+          lists.textContent = `Day ${currentDate.getDate()} : ${lap}`;
+          recordList.appendChild(lists);
+        });
+      };
+
+      let reql = document.querySelectorAll(".date");
+      let overlay = document.querySelector(".overlay");
+      let leave = document.querySelector(".leave");
+      reql.forEach((date) => {
+        date.addEventListener("click", () => {
+          overlay.style.display = "block";
+          leave.style.display = "block";
+        });
+      });
+
+      let cancel = document.querySelector(".can");
+      cancel.addEventListener("click", () => {
+        overlay.style.display = "none";
+        leave.style.display = "none";
+      });
+
+      let name = document.getElementById("name");
+      let reason = document.getElementById("reason");
+      let reqbtn = document.querySelector(".req");
+      let can = document.querySelector(".can");
+      reqbtn.addEventListener("click", (event) => {
+        event.preventDefault();
+        let nameVal = name.value;
+        let reasonVal = reason.value;
+
+        const previousLeaves = JSON.parse(localStorage.getItem("leaves")) || [];
+        const leaves = { nameVal, reasonVal };
+        localStorage.setItem(
+          "leaves",
+          JSON.stringify(previousLeaves.concat(leaves))
+        );
+
+        overlay.style.display = "none";
+        leave.style.display = "none";
+      });
+    </script>
+  </body>
+</html>
